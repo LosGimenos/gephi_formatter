@@ -2,60 +2,97 @@ import re
 from openpyxl import load_workbook, Workbook
 from .models import TwitterData, InstagramData
 
-def load_input(filename):
+def load_input(category_list, filename):
     file_path = 'xl_formatter/input_files/' + filename +'.xlsx'
     input_data = load_workbook(file_path, read_only=True)
     ws = input_data.active
+    categories = {}
 
     for index, row in enumerate(ws.rows):
 
         if index == 0:
+            for col in enumerate(row):
+                category_index = col[0]
+                category_title = col[1].value
+
+                # add snippet to category_list
+                if 'snippet' not in category_list:
+                    category_list.append('snippet')
+
+                # add pageType to category_list
+                if 'pageType' not in category_list:
+                    category_list.append('pageType')
+
+                if category_title in category_list:
+                    categories[category_title] = {}
+                    categories[category_title]['index'] = category_index
             continue
 
-        type = row[1].value
-
-        def clean_integer_data(value):
-            if value == 'NA':
-                value = None
-            return value
-
-        content = row[7].value
-        clout = row[6].value
-        followers = row[105].value
-
         try:
-            author = row[9].value.lower()
+            type = row[categories['pageType']['index']].value.lower()
         except:
-            author = row[9].value
+            type = row[categories['pageType']['index']].value
 
-        brand_source = row[121].value
-        try:
-            brand_source = re.sub(r'\s', '', brand_source)
-        except:
-            print('Brand Source err', brand_source)
+        def extract_value(category):
+            if category in category_list:
+                category_value = row[categories[category]['index']].value
+            else:
+                return None
 
-        if (content == 'None' or content == '' or content == None):
-            content = row[8].value
+            return category_value
 
-        if clout == 'None':
-            clout = 0
+        def return_clout():
+            clout_value = extract_value('clout')
+            if clout_value == None or type(clout_value) is str:
+                clout_value = 0
 
-        if followers == 'NA':
-            followers = 0
+            return clout_value
+
+        def return_content():
+            content_value = extract_value('fulltext')
+            if (content_value == 'None' or content_value == '' or content_value == None or content_value == 'NA'):
+                content_value = row[categories['snippet']['index']].value
+
+            return content_value
+
+        def return_author():
+            author_value = extract_value('author')
+            try:
+                author_value = author_value.lower()
+                return author_value
+            except:
+                return author_value
+
+        def return_followers():
+            followers_value = extract_value('followers')
+
+            if followers_value == None or followers_value == 'NA':
+                followers_value = 0
+
+            return int(followers_value)
+
+        def return_brand_source():
+            brand_source_value = extract_value('brand_source')
+            try:
+                brand_source_value = re.sub(r'\s', '', brand_source_value)
+                return brand_source_value
+            except:
+                return brand_source_value
+
 
         if type == 'twitter':
 
             twitter_data = TwitterData(
-                url=row[0].value,
-                date=row[2].value,
-                author_gender=row[3].value,
-                city=row[4].value,
-                sentiment=row[5].value,
-                author_clout=clout,
-                contents=content,
-                author=author,
-                followers=followers,
-                brand_source=brand_source,
+                url=extract_value('url'),
+                date=extract_value('date'),
+                author_gender=extract_value('gender'),
+                city=extract_value('city'),
+                sentiment=extract_value('sentiment'),
+                author_clout=return_clout(),
+                contents=return_content(),
+                author=return_author(),
+                followers=return_followers(),
+                brand_source=return_brand_source(),
                 type=type
             )
 
@@ -64,22 +101,20 @@ def load_input(filename):
         if type == 'instagram':
 
             instagram_data = InstagramData(
-                url=row[0].value,
-                date=row[2].value,
-                author_gender=row[3].value,
-                city=row[4].value,
-                sentiment=row[5].value,
-                author_clout=clout,
-                contents=content,
-                author=author,
-                followers=followers,
-                brand_source=brand_source,
-                type = type
+                url=extract_value('url'),
+                date=extract_value('date'),
+                author_gender=extract_value('gender'),
+                city=extract_value('city'),
+                sentiment=extract_value('sentiment'),
+                author_clout=return_clout(),
+                contents=return_content(),
+                author=return_author(),
+                followers=return_followers(),
+                brand_source=return_brand_source(),
+                type=type
             )
 
             instagram_data.save()
-
-        print(index)
 
 def split_input():
     print('Loading input data')
