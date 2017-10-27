@@ -2,7 +2,7 @@ import csv
 
 from .models import TwitterMention, TwitterData, InstagramMention, InstagramData
 
-def consolodate_edges(edge_edge_fieldnames,edge_ country, source, force_directed=False):
+def consolodate_edges(country, source, force_directed=False, edge_fieldnames=['Source', 'Target', 'Type', 'Weight']):
     mention_dict = {}
     base_filename = 'xl_formatter/csv_exports/' + country
 
@@ -37,7 +37,7 @@ def consolodate_edges(edge_edge_fieldnames,edge_ country, source, force_directed
                 data_id = mention.instagram_data_id
                 mention_dict[mention_key]['sort_number'] = data_id
 
-            for fieldname in edge_fieldnames:edge_
+            for fieldname in edge_fieldnames:
                 if fieldname == 'Source':
                     mention_dict[mention_key]['author'] = mention.author
                 elif fieldname == 'Target':
@@ -78,13 +78,13 @@ def consolodate_nodes(node_fieldnames, country, source):
         export_filename = base_filename + '_insta_nodes.csv'
 
     with open(export_filename, 'w') as csv_file:
-        fieldnames = ['Id', 'Label', 'Followers', 'Gender', 'BrandSource']
+        # fieldnames = ['Id', 'Label', 'Followers', 'Gender', 'BrandSource']
         node_fieldnames.extend(('Id', 'Label'))
 
         writer = csv.DictWriter(csv_file, delimiter=';', fieldnames=node_fieldnames)
         writer.writeheader()
 
-        for row in authors_data:
+        for row in author_data:
             dict_to_write = {
                 'Id': row.author,
                 'Label': row.author,
