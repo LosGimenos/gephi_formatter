@@ -115,36 +115,5 @@ def load_input(category_list, filename):
             )
 
             instagram_data.save()
-
-def split_input():
-    print('Loading input data')
-    file_path = 'xl_formatter/sun_care.xlsx'
-    input_data = load_workbook(file_path, read_only=True)
-    print('Data load complete!')
-    print('Grabbing sheet')
-    ws = input_data['Sheet']
-    print('Grabbed that sheet!')
-
-    print('start new workbook stuff')
-    new_workbook = Workbook(write_only=True)
-    new_sheet = new_workbook.create_sheet()
-    print('workbook stuff done playa')
-
-    counter = 0
-    print('starting the writing process')
-    for row in ws.iter_rows():
-        row_data = []
-        for cell in row:
-            row_data.append(cell.value)
-        print('appending row!', counter)
-        counter += 1
-        new_sheet.append(row_data)
-
-    print('All Done writing playa!!!')
-    print('Starting save!')
-    new_workbook.save('xl_formatter/sun_care_sheet.xlsx')
-    print('All done save!')
-
-
-
+    print(categories)
 
