@@ -1,4 +1,5 @@
 import csv
+import re
 
 from .models import TwitterMention, TwitterData, InstagramMention, InstagramData
 
@@ -70,10 +71,10 @@ def consolodate_nodes(node_fieldnames, country, source):
 
     base_filename = 'xl_formatter/csv_exports/' + country
 
-    if source == 'twitter':
+    if source.lower() == 'twitter':
         author_data = TwitterData.objects.distinct('author')
         export_filename = base_filename + '_twitter_nodes.csv'
-    if source == 'instagram':
+    if source.lower() == 'instagram':
         author_data = InstagramData.objects.distinct('author')
         export_filename = base_filename + '_insta_nodes.csv'
 
@@ -95,9 +96,9 @@ def consolodate_nodes(node_fieldnames, country, source):
             except:
                 gender = 'unknown'
 
-            if gender == 'male':
+            if gender == 'male' or gender == 'm' or gender == 'M':
                 gender = 'male'
-            elif gender == 'female':
+            elif gender == 'female' or gender == 'f' or gender == 'F':
                 gender = 'female'
             else:
                 gender = 'unknown'
@@ -114,7 +115,9 @@ def consolodate_nodes(node_fieldnames, country, source):
                 elif fieldname == 'City':
                     dict_to_write['City'] = row.city
                 elif fieldname == 'Sentiment':
-                    dict_to_write['Sentiment'] = row.sentiment
+                    sentiment_value = row.sentiment
+                    sentiment_value = re.sub('[\W+]', '', sentiment_value)
+                    dict_to_write['Sentiment'] = sentiment_value
                 elif fieldname == 'Emotion':
                     dict_to_write['Emotion'] = row.emotion
                 elif fieldname == 'Clout':
@@ -133,8 +136,8 @@ def consolodate_nodes(node_fieldnames, country, source):
                     dict_to_write['Followers'] = row.followers
                 elif fieldname == 'Statuses':
                     dict_to_write['Statuses'] = row.statuses
-                elif fieldname == 'BrandSource':
-                    dict_to_write['BrandSource'] = row.brand_source
+                elif fieldname == 'BrandSource' or fieldname == 'Campaign' or fieldname == 'Brands':
+                    dict_to_write[fieldname] = row.brand_source
 
             writer.writerow(dict_to_write)
 
