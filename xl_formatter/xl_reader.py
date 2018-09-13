@@ -14,10 +14,9 @@ def load_input(category_list, filename):
             for col in enumerate(row):
                 category_index = col[0]
                 category_title = col[1].value
-
                 # add snippet to category_list
-                if 'snippet' not in category_list:
-                    category_list.append('snippet')
+                # if 'snippet' not in category_list:
+                #     category_list.append('snippet')
 
                 # add pageType to category_list
                 if 'pageType' not in category_list:
@@ -27,7 +26,6 @@ def load_input(category_list, filename):
                     categories[category_title] = {}
                     categories[category_title]['index'] = category_index
             continue
-
         try:
             type = row[categories['pageType']['index']].value.lower()
         except:
@@ -49,14 +47,30 @@ def load_input(category_list, filename):
             return clout_value
 
         def return_content():
-            content_value = extract_value('fulltext')
+            content_titles = ['contents', 'fulltext']
+            title_value = None
+
+            for content_title in content_titles:
+                try:
+                    content_value = extract_value(content_title)
+                except:
+                    pass
+                if content_value:
+                    title_value = content_title
+                    break
+
             if (content_value == 'None' or content_value == '' or content_value == None or content_value == 'NA'):
-                content_value = row[categories['snippet']['index']].value
+                content_value = row[categories[title_value]['index']].value
 
             return content_value
 
         def return_author():
             author_value = extract_value('author')
+
+            if author_value:
+                if '@' in author_value:
+                    author_value = re.sub('@', '', author_value)
+
             try:
                 author_value = author_value.lower()
                 return author_value
@@ -66,13 +80,21 @@ def load_input(category_list, filename):
         def return_followers():
             followers_value = extract_value('followers')
 
-            if followers_value == None or followers_value == 'NA':
+            if followers_value == None or followers_value == 'NA' or followers_value == '':
                 followers_value = 0
 
             return int(followers_value)
 
         def return_brand_source():
-            brand_source_value = extract_value('brand_source')
+            brand_source_value = extract_value('brand')
+            try:
+                brand_source_value = re.sub(r'\s', '', brand_source_value)
+                return brand_source_value
+            except:
+                return brand_source_value
+
+        def return_sentiment():
+            brand_source_value = extract_value('sentiment')
             try:
                 brand_source_value = re.sub(r'\s', '', brand_source_value)
                 return brand_source_value

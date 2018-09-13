@@ -73,7 +73,7 @@ def extract_mentions():
         isMixed = False
         isRetweet = False
 
-        if rt_string[0] == 'RT':
+        if rt_string[0] == 'RT' or rt_string[0] == '#Repost':
             isMixed = True
             isRetweet = True
         else:

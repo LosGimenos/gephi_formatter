@@ -57,6 +57,9 @@ def load_input(category_list, filename):
 
         def return_author():
             author_value = extract_value('author')
+            if '@' in author_value:
+                author_value = re.sub('@', '', author_value)
+
             try:
                 author_value = author_value.lower()
                 return author_value
